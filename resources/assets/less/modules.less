@@ -11,6 +11,18 @@
     font-weight: 400;
 }
 
+.btn-download {
+    background-color: @brand-primary;
+    color: #fff;
+    border-radius: 0;
+    transition: 0.3s ease;
+    font-size: 20px;
+
+    &:hover {
+        background-color: darken(@brand-primary, 10%);
+    }
+}
+
 // Dropzone styling
 .dz-hidden-input {
     visibility: hidden;
@@ -26,4 +38,7 @@
 }
 .dz-message {
     margin: 10px 0 !important;
+}
+#dropzone {
+    border: 2px dashed @brand-primary;
 }

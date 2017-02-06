@@ -37,6 +37,13 @@
       </div>
     </section>
 
+    <!-- Download button goes here -->
+    <section class="result">
+      <div class="container" id="result">
+        
+      </div>
+    </section>
+
     <!-- Modal -->
     <div class="modal fade general-modal" tabindex="-1" role="dialog" aria-labelledby="generalModal" aria-hidden="true">
       <div class="modal-dialog modal-lg">

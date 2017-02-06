@@ -58,6 +58,33 @@ function parseCSV(file) {
     Papa.parse(file, {
         complete: function(results) {
             console.log("Finished:", results.data);
+            console.log(JSON.stringify(results.data))
+
+            $('#result').append('<a href="'+makeTextFile(JSON.stringify(results.data))+'" download="record'+timeStamp()+'" class="btn btn-download">Download Text File</a>').show();
         }
     });
 }
+
+  // var create = document.getElementById('create'),
+  //   textbox = document.getElementById('textbox');
+
+  // create.addEventListener('click', function () {
+  //   var link = document.getElementById('downloadlink');
+  //   link.href = makeTextFile(textbox.value);
+  //   link.style.display = 'block';
+  // }, false);
+
+var textFile = null;
+var makeTextFile = function (text) {
+    var data = new Blob([text], {type: 'text/plain'});
+
+    // If we are replacing a previously generated file we need to
+    // manually revoke the object URL to avoid memory leaks.
+    if (textFile !== null) {
+      window.URL.revokeObjectURL(textFile);
+    }
+
+    textFile = window.URL.createObjectURL(data);
+
+    return textFile;
+};
