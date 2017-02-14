@@ -1,5 +1,5 @@
 var module_path    = "../node_modules/";
-var bower_files    = "../bower_components/";
+var bower_files    = "../../project-starter/vendor/";
 // var mainBowerFiles = require(module_path + 'main-bower-files');
 var gulp           = require(module_path + 'gulp'),
     gutil          = require(module_path + 'gulp-util');
@@ -75,12 +75,13 @@ gulp.task('css', function() {
 gulp.task('js', function(){  
   return gulp.src([
       paths.dev.vendor+'jquery/dist/jquery.js',
-      paths.dev.vendor+'bootstrap/js/modal.js',
+      // paths.dev.vendor+'bootstrap/js/modal.js',
       // paths.dev.vendor+'bootstrap/js/tooltip.js',
       // paths.dev.vendor+'bootstrap/js/popover.js',
       // // paths.dev.vendor+'bootstrap/js/collapse.js',
-      paths.dev.vendor+'bootstrap/js/transition.js',
-      paths.dev.vendor+'parsleyjs/dist/parsley.js',
+      // paths.dev.vendor+'bootstrap/js/transition.js',
+      // paths.dev.vendor+'parsleyjs/dist/parsley.js',
+      paths.dev.vendor+'moment/moment.js',
       // '!'+paths.dev.js+'_*.js',
       paths.dev.js+'**/*'
     ])

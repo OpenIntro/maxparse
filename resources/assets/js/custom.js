@@ -1,90 +1,64 @@
 $(function() {
 
-    Dropzone.options.dropzone = {
-      paramName: "file", // The name that will be used to transfer the file
-      maxFilesize: 2, // MB
-      accept: function(file, done) {
-        done();
-        console.log(file.name+' has been uploaded.');
+    var colors = new Array(
+    [62,35,255],
+    [60,255,60],
+    [255,35,98],
+    [45,175,230],
+    [255,0,255],
+    [255,128,0]);
 
-        parseCSV(file);
-      },
-      renameFilename: cleanFilename,
-      acceptedFiles: '.csv'
-};
+    var step = 0;
+    //color table indices for: 
+    // current color left
+    // next color left
+    // current color right
+    // next color right
+    var colorIndices = [0,1,2,3];
+
+    //transition speed
+    var gradientSpeed = 0.002;
+
+    function updateGradient()
+    {
+      
+      if ( $===undefined ) return;
+      
+    var c0_0 = colors[colorIndices[0]];
+    var c0_1 = colors[colorIndices[1]];
+    var c1_0 = colors[colorIndices[2]];
+    var c1_1 = colors[colorIndices[3]];
+
+    var istep = 1 - step;
+    var r1 = Math.round(istep * c0_0[0] + step * c0_1[0]);
+    var g1 = Math.round(istep * c0_0[1] + step * c0_1[1]);
+    var b1 = Math.round(istep * c0_0[2] + step * c0_1[2]);
+    var color1 = "rgb("+r1+","+g1+","+b1+")";
+
+    var r2 = Math.round(istep * c1_0[0] + step * c1_1[0]);
+    var g2 = Math.round(istep * c1_0[1] + step * c1_1[1]);
+    var b2 = Math.round(istep * c1_0[2] + step * c1_1[2]);
+    var color2 = "rgb("+r2+","+g2+","+b2+")";
+
+     $('.page-header').css({
+       background: "-webkit-gradient(linear, left top, right top, from("+color1+"), to("+color2+"))"}).css({
+        background: "-moz-linear-gradient(left, "+color1+" 0%, "+color2+" 100%)"});
+      
+      step += gradientSpeed;
+      if ( step >= 1 )
+      {
+        step %= 1;
+        colorIndices[0] = colorIndices[1];
+        colorIndices[2] = colorIndices[3];
+        
+        //pick two new target color indices
+        //do not pick the same as the current one
+        colorIndices[1] = ( colorIndices[1] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
+        colorIndices[3] = ( colorIndices[3] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
+        
+      }
+    }
+
+    setInterval(updateGradient,10);
 
 }); // end ready function
-
-function timeStamp() {
-// Create a date object with the current time
-  var now = new Date();
-
-// Create an array with the current month, day and time
-  var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
-
-// Create an array with the current hour, minute and second
-  var time = [ now.getHours(), now.getMinutes(), now.getSeconds() ];
-
-// Determine AM or PM suffix based on the hour
-  var suffix = ( time[0] < 12 ) ? "AM" : "PM";
-
-// Convert hour from military time
-  time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
-
-// If hour is 0, set it to 12
-  time[0] = time[0] || 12;
-
-// If seconds and minutes are less than 10, add a zero
-  for ( var i = 1; i < 3; i++ ) {
-    if ( time[i] < 10 ) {
-      time[i] = "0" + time[i];
-    }
-  }
-
-// Return the formatted string
-  return date.join("") + time.join("");
-}
-
-// renames uploaded file with timestamp
-var cleanFilename = function (name) {
-    name = name.toLowerCase().replace(/[^\w]/gi, '')
-    name = name.replace('csv', '')
-    name = name + timeStamp() + ".csv";
-    return name;
-};
-
-function parseCSV(file) {
-    // Parse local CSV file
-    Papa.parse(file, {
-        complete: function(results) {
-            console.log("Finished:", results.data);
-            console.log(JSON.stringify(results.data))
-
-            $('#result').append('<a href="'+makeTextFile(JSON.stringify(results.data))+'" download="record'+timeStamp()+'" class="btn btn-download">Download Text File</a>').show();
-        }
-    });
-}
-
-  // var create = document.getElementById('create'),
-  //   textbox = document.getElementById('textbox');
-
-  // create.addEventListener('click', function () {
-  //   var link = document.getElementById('downloadlink');
-  //   link.href = makeTextFile(textbox.value);
-  //   link.style.display = 'block';
-  // }, false);
-
-var textFile = null;
-var makeTextFile = function (text) {
-    var data = new Blob([text], {type: 'text/plain'});
-
-    // If we are replacing a previously generated file we need to
-    // manually revoke the object URL to avoid memory leaks.
-    if (textFile !== null) {
-      window.URL.revokeObjectURL(textFile);
-    }
-
-    textFile = window.URL.createObjectURL(data);
-
-    return textFile;
-};

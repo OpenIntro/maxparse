@@ -34,13 +34,45 @@
 
           <input type="file" name="file" class="dz-hidden-input" />
         </form>
+        
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="vendorEmail">Vendor Email</label>
+              <input type="email" id="vendorEmail" name="vendorEmail" class="form-control" value="sean@leadingresponse.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="row" id="advanced" style="display: none">
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="vendorEmail">Vendor ID</label>
+              <input type="email" id="vendorID" name="vendorID" class="form-control" value="0000000353">
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="campaignCode">Campaign Code</label>
+              <input type="text" id="campaignCode" name="campaignCode" class="form-control" value="999999" maxlength="10">
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="sequenceCode">Sequence Code</label>
+              <input type="text" id="sequenceCode" name="sequenceCode" class="form-control" value="001" maxlength="3">
+            </div>
+          </div>
+        </div>
+
+        <div class="btn btn-download btn-process" id="btn-process">Parse</div>
       </div>
     </section>
 
     <!-- Download button goes here -->
     <section class="result">
       <div class="container" id="result">
-        
+        <h2>Results</h2>
       </div>
     </section>
 
@@ -54,5 +86,11 @@
     </div>
 
     <script src="assets/js/all.min.js"></script>
+
+    <script>
+      // brain is On
+      brain.init();
+    </script>
+
   </body>
 </html>
