@@ -1,5 +1,12 @@
 <!doctype html>
 <!--
+  __  __          __   __  _____                    
+ |  \/  |   /\    \ \ / / |  __ \                   
+ | \  / |  /  \    \ V /  | |__) |_ _ _ __ ___  ___ 
+ | |\/| | / /\ \    > <   |  ___/ _` | '__/ __|/ _ \
+ | |  | |/ ____ \  / . \  | |  | (_| | |  \__ \  __/
+ |_|  |_/_/    \_\/_/ \_\ |_|   \__,_|_|  |___/\___|
+                                                    
 -->
 <html prefix="og: http://ogp.me/ns#">
   <head>
@@ -40,7 +47,13 @@
             <div class="form-group">
               <label for="vendorEmail">Vendor Email</label>
               <input type="email" id="vendorEmail" name="vendorEmail" class="form-control" value="sean@leadingresponse.com">
+
+              
             </div>
+          </div>
+
+          <div class="col-sm-4 viewmore">
+            <a href="javascript:void(0)" id="advanced-link" class="small-link">View Advanced Fields</a>
           </div>
         </div>
 

@@ -61,4 +61,11 @@ $(function() {
 
     setInterval(updateGradient,10);
 
+
+    // Advanced Fields Show
+    $('#advanced-link').on('click', function() {
+        $(this).hide();
+        $('#advanced').show();
+    });
+
 }); // end ready function
