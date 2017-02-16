@@ -47,8 +47,13 @@
             <div class="form-group">
               <label for="vendorEmail">Vendor Email</label>
               <input type="email" id="vendorEmail" name="vendorEmail" class="form-control" value="sean@leadingresponse.com">
+            </div>
+          </div>
 
-              
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="campaignCode">Campaign Code</label>
+              <input type="text" id="campaignCode" name="campaignCode" class="form-control" value="500604" maxlength="10">
             </div>
           </div>
 
@@ -62,12 +67,6 @@
             <div class="form-group">
               <label for="vendorEmail">Vendor ID</label>
               <input type="email" id="vendorID" name="vendorID" class="form-control" value="0000000353">
-            </div>
-          </div>
-          <div class="col-sm-4">
-            <div class="form-group">
-              <label for="campaignCode">Campaign Code</label>
-              <input type="text" id="campaignCode" name="campaignCode" class="form-control" value="999999" maxlength="10">
             </div>
           </div>
           <div class="col-sm-4">
