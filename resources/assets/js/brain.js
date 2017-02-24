@@ -157,8 +157,10 @@ var brain = {
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
-            recordData = recordData+data[i].first_name+brain.createFiller(30-data[i].first_name.length)+' ';
-            recordData = recordData+data[i].last_name+brain.createFiller((35-data[i].last_name.length)+127);
+            var firstName = brain.cleanNameCharacters(data[i].first_name);
+            recordData = recordData+firstName+brain.createFiller(30-data[i].first_name.length)+' ';
+            var lastName = brain.cleanNameCharacters(data[i].last_name)
+            recordData = recordData+lastName+brain.createFiller((35-data[i].last_name.length)+127);
             var zipcode = data[i].zip_code;
             if (zipcode.substr(0,2) == "z:") {
                 zipcode = zipcode.substr(2,5);
@@ -205,8 +207,10 @@ var brain = {
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
-            recordData = recordData+data[i]['First Name']+brain.createFiller(30-data[i]['First Name'].length)+' ';
-            recordData = recordData+data[i]['Last Name']+brain.createFiller((35-data[i]['Last Name'].length)+127);
+            var firstName = brain.cleanNameCharacters(data[i]['First Name']);
+            recordData = recordData+firstName+brain.createFiller(30-data[i]['First Name'].length)+' ';
+            var lastName = brain.cleanNameCharacters(data[i]['Last Name']);
+            recordData = recordData+lastName+brain.createFiller((35-data[i]['Last Name'].length)+127);
             recordData = recordData+countryCode+data[i]['Zipcode']+'     '; // Zip plus spaces
             var phoneHome = data[i]['Phone'];
                 phoneHome = phoneHome.replace(/-/g, ""); // replace dashes in phone number
@@ -253,8 +257,10 @@ var brain = {
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
-            recordData = recordData+data[i]['first_name']+brain.createFiller(30-data[i]['first_name'].length)+' ';
-            recordData = recordData+data[i]['last_name']+brain.createFiller((35-data[i]['last_name'].length)+127);
+            var firstName = brain.cleanNameCharacters(data[i]['first_name']);
+            recordData = recordData+firstName+brain.createFiller(30-data[i]['first_name'].length)+' ';
+            var lastName = brain.cleanNameCharacters(data[i]['last_name']);
+            recordData = recordData+lastName+brain.createFiller((35-data[i]['last_name'].length)+127);
             recordData = recordData+countryCode+data[i]['zip_code']+'     '; // Zip plus spaces
             var phoneHome = data[i]['phone'];
                 phoneHome = phoneHome.replace(/-/g, ""); // replace dashes in phone number
@@ -315,6 +321,16 @@ var brain = {
         name = name.toLowerCase().replace(/[^\w]/gi, '')
         name = name.replace('csv', '')
         name = name + '-' + brain.timeStamp() + ".csv";
+        return name;
+    },
+    cleanNameCharacters: function(name){
+        name = name.replace('á', 'a');
+        name = name.replace('é', 'e');
+        name = name.replace('í', 'i');
+        name = name.replace('ó', 'o');
+        name = name.replace('ú', 'u');
+        name = name.replace('ü', 'u');
+        name = name.replace('ñ', 'n');
         return name;
     },
     timeStamp: function(){
