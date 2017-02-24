@@ -69,7 +69,7 @@ var brain = {
         var recordCount = brain.config.recordCount;
         var filler3 = brain.createFiller((10-recordCount.toString().length)+1124);
 
-        brain.config.footerData = trailerCode+vendorId+filler1+dateTime+filler2+recordCount+filler3;
+        brain.config.footerData = trailerCode+vendorId+filler1+dateTime+filler2+recordCount+filler3+"\n";
     },
     parseCSV: function(file,name) {
         // Parse local CSV file
@@ -159,7 +159,11 @@ var brain = {
             recordData = recordData+divisionCode+businessFlag+filler1;
             recordData = recordData+data[i].first_name+brain.createFiller(30-data[i].first_name.length)+' ';
             recordData = recordData+data[i].last_name+brain.createFiller((35-data[i].last_name.length)+127);
-            recordData = recordData+countryCode+data[i].zip_code+'     '; // Zip plus spaces
+            var zipcode = data[i].zip_code;
+            if (zipcode.substr(0,2) == "z:") {
+                zipcode = zipcode.substr(2,5);
+            }
+            recordData = recordData+countryCode+zipcode+'     '; // Zip plus spaces
             recordData = recordData+phoneHome+phoneWork;
             recordData = recordData+data[i].email;
             recordData = recordData+brain.createFiller(80-data[i].email.length);
