@@ -157,9 +157,9 @@ var brain = {
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
-            var firstName = brain.cleanNameCharacters(data[i].first_name);
+            var firstName = brain.scrubName(data[i].first_name);
             recordData = recordData+firstName+brain.createFiller(30-data[i].first_name.length)+' ';
-            var lastName = brain.cleanNameCharacters(data[i].last_name)
+            var lastName = brain.scrubName(data[i].last_name)
             recordData = recordData+lastName+brain.createFiller((35-data[i].last_name.length)+127);
             var zipcode = data[i].zip_code;
             if (zipcode.substr(0,2) == "z:") {
@@ -207,9 +207,9 @@ var brain = {
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
-            var firstName = brain.cleanNameCharacters(data[i]['First Name']);
+            var firstName = brain.scrubName(data[i]['First Name']);
             recordData = recordData+firstName+brain.createFiller(30-data[i]['First Name'].length)+' ';
-            var lastName = brain.cleanNameCharacters(data[i]['Last Name']);
+            var lastName = brain.scrubName(data[i]['Last Name']);
             recordData = recordData+lastName+brain.createFiller((35-data[i]['Last Name'].length)+127);
             recordData = recordData+countryCode+data[i]['Zipcode']+'     '; // Zip plus spaces
             var phoneHome = data[i]['Phone'];
@@ -257,9 +257,9 @@ var brain = {
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
-            var firstName = brain.cleanNameCharacters(data[i]['first_name']);
+            var firstName = brain.scrubName(data[i]['first_name']);
             recordData = recordData+firstName+brain.createFiller(30-data[i]['first_name'].length)+' ';
-            var lastName = brain.cleanNameCharacters(data[i]['last_name']);
+            var lastName = brain.scrubName(data[i]['last_name']);
             recordData = recordData+lastName+brain.createFiller((35-data[i]['last_name'].length)+127);
             recordData = recordData+countryCode+data[i]['zip_code']+'     '; // Zip plus spaces
             var phoneHome = data[i]['phone'];
@@ -323,7 +323,7 @@ var brain = {
         name = name + '-' + brain.timeStamp() + ".csv";
         return name;
     },
-    cleanNameCharacters: function(name){
+    scrubName: function(name){
         name = name.replace('á', 'a');
         name = name.replace('é', 'e');
         name = name.replace('í', 'i');
@@ -331,6 +331,20 @@ var brain = {
         name = name.replace('ú', 'u');
         name = name.replace('ü', 'u');
         name = name.replace('ñ', 'n');
+
+        name = name.replace('Á', 'A');
+        name = name.replace('É', 'E');
+        name = name.replace('Í', 'I');
+        name = name.replace('Ó', 'O');
+        name = name.replace('Ú', 'U');
+        name = name.replace('Ü', 'U');
+        name = name.replace('Ñ', 'N');
+
+        name = name.replace('ä', 'a');
+        name = name.replace('Ä', 'A');
+
+        // Removes all non-ASCII characters
+        name = name.replace(/[^\x00-\x7F]/g, "");
         return name;
     },
     timeStamp: function(){
