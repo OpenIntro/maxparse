@@ -7,7 +7,10 @@ var brain = {
             textData: '',
             headerData: '',
             footerData: '',
+            recordData: '',
             recordCount: 0,
+            combineRecords: false,
+            filesToProcess: 0,
             devMode: false
         };
         $.extend(brain.config, settings);
@@ -15,6 +18,8 @@ var brain = {
     },
     ready: function(){
         this.config.$processBtn.click(function(e){
+            brain.config.uploadedFiles = 0;
+            brain.config.combineRecords = $('#combine:checkbox:checked').length > 0;
             e.preventDefault();
         });
 
@@ -33,16 +38,21 @@ var brain = {
             acceptedFiles: '.csv',
             addRemoveLinks: true,
             autoProcessQueue: false,
+            parallelUploads: 10,
             init: function() {
                 myDropzone = this;
                 $('#btn-process').on('click', function() {
+                    if (brain.config.combineRecords) { brain.config.filesToProcess = myDropzone.files.length; } // how many CSV files are uploaded
                     myDropzone.processQueue(); 
                 });
+
+                // this.on("success", function() {
+                //    myDropzone.options.autoProcessQueue = true; 
+                // });
                 myDropzone.on("complete", function(file) {
                     myDropzone.removeFile(file);
                     console.log(file.name+' has been uploaded.');
                     var name = $(file.previewElement).find('[data-dz-name]').text();
-                    brain.createHeader();
                     brain.parseCSV(file,name);
                 });
             },
@@ -103,7 +113,6 @@ var brain = {
         });
     },
     parseDataPandora: function(data,name) {
-        brain.config.recordCount = 0; // reset for each file
         var recordData = '';
         var divisionCode = 'FD ';
         var businessFlag = 'I';
@@ -138,12 +147,14 @@ var brain = {
 
         console.log(brain.config.recordCount+' records created')
 
-        brain.createFooter();
-        brain.config.textData=brain.config.headerData+recordData+brain.config.footerData;
-        brain.showResult(name, brain.config.textData, brain.config.recordCount);
+        brain.config.recordData = brain.config.recordData + recordData;
+
+        brain.config.filesToProcess = brain.config.filesToProcess - 1;
+        if (brain.config.filesToProcess <= 0) {
+            brain.showResult(name, brain.config.recordData, brain.config.recordCount);
+        }
     },
     parseDataFacebook: function(data,name) {
-        brain.config.recordCount = 0; // reset for each file
         var recordData = '';
         var divisionCode = 'FD ';
         var businessFlag = 'I';
@@ -188,12 +199,15 @@ var brain = {
 
         console.log(brain.config.recordCount+' records created')
 
-        brain.createFooter();
-        brain.config.textData=brain.config.headerData+recordData+brain.config.footerData;
-        brain.showResult(name, brain.config.textData, brain.config.recordCount);
+        brain.config.recordData = brain.config.recordData + recordData;
+
+        brain.config.filesToProcess = brain.config.filesToProcess - 1;
+        console.log()
+        if (brain.config.filesToProcess <= 0) {
+            brain.showResult(name, brain.config.recordData, brain.config.recordCount);
+        }
     },
     parseDataMailchimp: function(data,name) {
-        brain.config.recordCount = 0; // reset for each file
         var recordData = '';
         var divisionCode = 'FD ';
         var businessFlag = 'I';
@@ -237,13 +251,15 @@ var brain = {
         });
 
         console.log(brain.config.recordCount+' records created')
+        
+        brain.config.recordData = brain.config.recordData + recordData;
 
-        brain.createFooter();
-        brain.config.textData=brain.config.headerData+recordData+brain.config.footerData;
-        brain.showResult(name, brain.config.textData, brain.config.recordCount);
+        brain.config.filesToProcess = brain.config.filesToProcess - 1;
+        if (brain.config.filesToProcess <= 0) {
+            brain.showResult(name, brain.config.recordData, brain.config.recordCount);
+        }
     },
     parseDataMAX: function(data,name) {
-        brain.config.recordCount = 0; // reset for each file
         var recordData = '';
         var divisionCode = 'FD ';
         var businessFlag = 'I';
@@ -283,9 +299,12 @@ var brain = {
 
         console.log(brain.config.recordCount+' records created')
 
-        brain.createFooter();
-        brain.config.textData=brain.config.headerData+recordData+brain.config.footerData;
-        brain.showResult(name, brain.config.textData, brain.config.recordCount);
+        brain.config.recordData = brain.config.recordData + recordData;
+
+        brain.config.filesToProcess = brain.config.filesToProcess - 1;
+        if (brain.config.filesToProcess <= 0) {
+            brain.showResult(name, brain.config.recordCount);
+        }
     },
     createFiller: function(num){
         var max = num; //times to repeat
@@ -298,10 +317,19 @@ var brain = {
             return ''
         }
     },
-    showResult: function(name, textData, numRecords) {
+    showResult: function(name, numRecords) {
+        brain.createHeader();
+        brain.createFooter();
+
+        brain.config.textData=brain.config.headerData+brain.config.recordData+brain.config.footerData;
+
         $('.result').show();
         name = name.replace('csv', 'txt')
-        $('#result').append('<p><a href="'+brain.makeTextFile(textData)+'" download="'+name+'" class="">Download '+name+'</a> - '+numRecords+' records</p>').show();
+        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+name+'" class="">Download '+name+'</a> - '+brain.config.recordCount+' records</p>').show();
+
+        brain.config.recordData = ''; // clear data
+        brain.config.textData = ''; // clear data
+        brain.config.recordCount = 0;  // clear data
     },
     makeTextFile: function(text){
         var textFile = null;

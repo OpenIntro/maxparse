@@ -77,6 +77,12 @@
           </div>
         </div>
 
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" id="combine" name="combine"> Combine records into one text file
+          </label>
+        </div>
+
         <div class="btn btn-download btn-process" id="btn-process">Parse</div>
       </div>
     </section>
