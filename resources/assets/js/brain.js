@@ -9,6 +9,7 @@ var brain = {
             footerData: '',
             recordData: '',
             recordCount: 0,
+            translationErrors: [],
             combineRecords: false,
             filesToProcess: 0,
             devMode: false
@@ -82,6 +83,7 @@ var brain = {
         brain.config.footerData = trailerCode+vendorId+filler1+dateTime+filler2+recordCount+filler3+"\n";
     },
     parseCSV: function(file,name) {
+        console.log(name)
         // Parse local CSV file
         Papa.parse(file, {
             header: true,
@@ -165,13 +167,45 @@ var brain = {
         var campaignCode = $('#campaignCode').val();
         var sequenceCode = $('#sequenceCode').val();
         var qa1 = '0799A';
+        var q2 = 'how_soon_are_you_looking_to_buy?';
+        var a2 = '';
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
+
+            // Name
             var firstName = brain.scrubName(data[i].first_name);
             recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
             var lastName = brain.scrubName(data[i].last_name)
-            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+127);
+            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
+
+            // Street Address
+            if (data[i].street_address != undefined) {
+                var streetAddress1 = data[i].street_address;
+                recordData = recordData+streetAddress1+brain.createFiller((40-streetAddress1.length+40)); // still adding 40 spaces for street address 2 which isn't present yet
+                // var streetAddress2 = data[i].street_address2;
+                // recordData = recordData+streetAddress2+brain.createFiller((40-streetAddress2));
+            } else {
+                recordData = recordData + brain.createFiller(80); 
+            }
+
+            // City
+            if (data[i].city != undefined) {
+                var city = data[i].city;
+                recordData = recordData+city+brain.createFiller((40-city.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // State
+            if (data[i].state != undefined) {
+                var state = data[i].state;
+                recordData = recordData+state+brain.createFiller((2-state.length));
+            } else {
+                recordData = recordData + brain.createFiller(2);
+            }
+
+            // Zip Code
             var zipcode = data[i].zip_code;
             if (zipcode.substr(0,2) == "z:") {
                 zipcode = zipcode.substr(2,5);
@@ -191,7 +225,24 @@ var brain = {
             recordData = recordData+date;
             recordData = recordData+brain.createFiller(45);
             recordData = recordData+qa1;
-            recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+
+            // Intent Question
+            if (data[i][q2] != undefined) {
+                var qa2 = '1077';
+
+                if (data[i][q2] == '0-30_Days')             {a2 = 'A';}
+                else if (data[i][q2] == '0-30_Days')        {a2 = 'A';}
+                else if (data[i][q2]== '1-3_Months')        {a2 = 'B';}
+                else if (data[i][q2] == '4-6_Months')       {a2 = 'C';}
+                else if (data[i][q2] == '7+_Months')        {a2 = 'D';}
+                else if (data[i][q2] == 'No_Definite_Plans'){a2 = 'E';}
+                else {qa2='    ';a2=' ';}
+                recordData = recordData+brain.createFiller(19);
+                recordData = recordData+qa2+a2;
+                recordData = recordData+brain.createFiller(691);
+            } else {
+                recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+            }
             recordData = recordData+'\n'; // end of record
 
             brain.config.recordCount = brain.config.recordCount + 1;
@@ -202,7 +253,7 @@ var brain = {
         brain.config.recordData = brain.config.recordData + recordData;
 
         brain.config.filesToProcess = brain.config.filesToProcess - 1;
-        console.log()
+
         if (brain.config.filesToProcess <= 0) {
             brain.showResult(name, brain.config.recordData, brain.config.recordCount);
         }
@@ -218,19 +269,60 @@ var brain = {
         var campaignCode = $('#campaignCode').val();
         var sequenceCode = $('#sequenceCode').val();
         var qa1 = '0799A';
+        var q2 = 'In Market Intent (1077)';
+        var a2 = '';
 
         $.each(data, function(i, item) {
             recordData = recordData+divisionCode+businessFlag+filler1;
             var firstName = brain.scrubName(data[i]['First Name']);
             recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
             var lastName = brain.scrubName(data[i]['Last Name']);
-            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+127);
+            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
+
+            // Street Address 1
+            var streetAddress1 = data[i]['Address 1'].substr(0,40);
+            if (streetAddress1 != undefined) {
+                recordData = recordData+streetAddress1+brain.createFiller((40-streetAddress1.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // Street Address 2
+            var streetAddress2 = data[i]['Address 2'].substr(0,40);
+            if (streetAddress2 != undefined) {
+                recordData = recordData+streetAddress2+brain.createFiller((40-streetAddress2.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // City
+            var city = data[i]['City'];
+            if (city != undefined) {
+                recordData = recordData+city+brain.createFiller((40-city.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // State
+            var state = data[i]['State'];
+            if (state != undefined) {
+                recordData = recordData+state+brain.createFiller((2-state.length));
+            } else {
+                recordData = recordData + brain.createFiller(2);
+            }
+
+            // Zipcode
             recordData = recordData+countryCode+data[i]['Zipcode']+'     '; // Zip plus spaces
+
+            // Phone
             var phoneHome = data[i]['Phone'];
                 phoneHome = phoneHome.replace(/-/g, ""); // replace dashes in phone number
             recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
+
+            // Email
             recordData = recordData+data[i]['Email Address']
             recordData = recordData+brain.createFiller(80-data[i]['Email Address'].length);
+
             recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
             recordData = recordData+brain.createFiller(60);
             var date = data[i]['CONFIRM_TIME'];
@@ -244,7 +336,18 @@ var brain = {
             recordData = recordData+date;
             recordData = recordData+brain.createFiller(45);
             recordData = recordData+qa1;
-            recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+            
+            // Intent Question
+            if (data[i][q2] != undefined) {
+                var qa2 = '1077';
+                     a2 = data[i][q2];
+                recordData = recordData+brain.createFiller(19);
+                recordData = recordData+qa2+a2;
+                recordData = recordData+brain.createFiller(691);
+            } else {
+                recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+            }
+
             recordData = recordData+'\n'; // end of record
 
             brain.config.recordCount = brain.config.recordCount + 1;
@@ -307,6 +410,7 @@ var brain = {
         }
     },
     createFiller: function(num){
+        // This function creates the chunks of blank spaces in the text file
         var max = num; //times to repeat
         var chr = " "; //char to repeat
 
@@ -321,11 +425,16 @@ var brain = {
         brain.createHeader();
         brain.createFooter();
 
+        // Created the file name for the .txt file
+        // FDAF_campaignCode-sequenceCode_NumberOfRecords_MMDDYY
+        var filename = 'leads_' + $('#campaignCode').val() + '-' + $('#sequenceCode').val() + '_' + brain.config.recordCount + '_' + moment().format('MMDDYY[_]hmmss');
+
+        // Put all content into one variable
         brain.config.textData=brain.config.headerData+brain.config.recordData+brain.config.footerData;
 
         $('.result').show();
         name = name.replace('csv', 'txt')
-        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+name+'" class="">Download '+name+'</a> - '+brain.config.recordCount+' records</p>').show();
+        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+filename+'" class="">Download '+filename+'</a> - '+brain.config.recordCount+' records</p>').show();
 
         brain.config.recordData = ''; // clear data
         brain.config.textData = ''; // clear data
@@ -345,11 +454,11 @@ var brain = {
 
         return textFile;
     },
-    cleanFilename: function(name){
-        name = name.toLowerCase().replace(/[^\w]/gi, '')
-        name = name.replace('csv', '')
-        name = name + '-' + brain.timeStamp() + ".csv";
-        return name;
+    cleanFilename: function(filename){
+        filename = filename.toLowerCase().replace(/[^\w]/gi, '')
+        filename = filename.replace('csv', '')
+        filename = filename + '-' + brain.timeStamp() + ".csv";
+        return filename;
     },
     scrubName: function(name){
         name = name.replace('á', 'a');
@@ -374,6 +483,15 @@ var brain = {
         name = name.replace('Ö', 'O');
         name = name.replace('ò', 'o');
         name = name.replace('Ò', 'O');
+
+        name = name.replace('Ã©', 'e');
+        name = name.replace('Ã',  'i');
+        name = name.replace('Ã±', 'n');
+        name = name.replace('Ã¡', 'a');
+        name = name.replace('Ãº', 'u');
+        name = name.replace('Ã³', 'o');
+        name = name.replace('Ã“', 'O');
+        name = name.replace('Ã‰', 'A');
 
         // Removes all non-ASCII characters
         name = name.replace(/[^\x00-\x7F]/g, "");
@@ -402,6 +520,7 @@ var brain = {
         // return date.join("") + time.join("");
         var now     = new Date(); 
         var year    = now.getFullYear();
+        var shortYear = now.getFullYear().toString().substr(-2);
         var month   = now.getMonth()+1; 
         var day     = now.getDate();
         var hour    = now.getHours();
@@ -422,7 +541,7 @@ var brain = {
         if(second.toString().length == 1) {
             var second = '0'+second;
         }  
-        var dateTime = month+day+year+'-'+hour+minute+second;
+        var dateTime = month+day+shortYear;
         brain.config.timeStamp = month+'/'+day+'/'+year+' '+hour+':'+minute;
         return dateTime;
     },
