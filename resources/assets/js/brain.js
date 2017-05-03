@@ -104,6 +104,9 @@ var brain = {
                 } else if (results.meta['fields'][0] == "id")  {
                   console.log('This file is from Facebook');
                   brain.parseDataFacebook(results.data,name)
+                } else if (results.meta['fields'][11] == "FDAF")  {
+                  console.log('This file is from Mailchimp with FDAF');
+                  brain.parseDataMailchimpFull(results.data,name)
                 } else if (results.meta['fields'][0] == "Email Address")  {
                   console.log('This file is from Mailchimp');
                   brain.parseDataMailchimp(results.data,name)
@@ -258,8 +261,116 @@ var brain = {
             brain.showResult(name, 'FB');
         }
     },
-    parseDataMailchimp: function(data,name) {
+    parseDataMailchimp: function(data,name) {        
+        var recordData = '';
+        var divisionCode = 'FD ';
+        var businessFlag = 'I';
+        var filler1 = brain.createFiller(57);  // filler before first name
+        var countryCode = 'USA';
+        // var phoneHome = brain.createFiller(10);
+        var phoneWork = brain.createFiller(10);
+        var campaignCode = $('#campaignCode').val();
+        var sequenceCode = $('#sequenceCode').val();
+        var qa1 = '0799A';
+        var q2 = 'In Market Intent (1077)';
+        var a2 = '';
 
+        $.each(data, function(i, item) {
+            recordData = recordData+divisionCode+businessFlag+filler1;
+            var firstName = brain.scrubName(data[i]['First Name']);
+            recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
+            var lastName = brain.scrubName(data[i]['Last Name']);
+            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
+
+            // Street Address 1
+            var streetAddress1 = data[i]['Address 1'];
+            if (streetAddress1 != undefined) {
+                recordData = recordData+streetAddress1.substr(0,40)+brain.createFiller((40-streetAddress1.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // Street Address 2
+            var streetAddress2 = data[i]['Address 2'];
+            if (streetAddress2 != undefined) {
+                recordData = recordData+streetAddress2.substr(0,40)+brain.createFiller((40-streetAddress2.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // City
+            var city = data[i]['City'];
+            if (city != undefined) {
+                recordData = recordData+city+brain.createFiller((40-city.length));
+            } else {
+                recordData = recordData + brain.createFiller(40); 
+            }
+
+            // State
+            var state = data[i]['State'];
+            if (state != undefined) {
+                recordData = recordData+state+brain.createFiller((2-state.length));
+            } else {
+                recordData = recordData + brain.createFiller(2);
+            }
+
+            // Zipcode
+            recordData = recordData+countryCode+data[i]['Zipcode']+'     '; // Zip plus spaces
+
+            // Phone
+            var phoneHome = data[i]['Phone'];
+                phoneHome = phoneHome.replace(/-/g, ""); // replace dashes in phone number
+            recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
+
+            // Email
+            recordData = recordData+data[i]['Email Address']
+            recordData = recordData+brain.createFiller(80-data[i]['Email Address'].length);
+
+            recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
+            recordData = recordData+brain.createFiller(60);
+            var date = data[i]['CONFIRM_TIME'];
+            if (date.substr(0,2) == "20") {
+                date = moment(date, "YYYY-MM-DD HH:mm:ss");
+            } else {
+                date = moment(date, "MM-DD-YYYY HH:mm:ss");
+            }
+            date = date.format("MM/DD/YYYY HH:mm");
+
+            recordData = recordData+date;
+            recordData = recordData+brain.createFiller(45);
+            recordData = recordData+qa1;
+            
+            // Intent Question
+            if (data[i][q2] != undefined) {
+                var a2 = data[i][q2];
+                if (a2 != '') {
+                    var qa2 = '1077';
+                 } else {
+                    var qa2 = '    ';
+                         a2 = ' ';
+                 }
+                recordData = recordData+brain.createFiller(19);
+                recordData = recordData+qa2+a2;
+                recordData = recordData+brain.createFiller(691);
+            } else {
+                recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+            }
+
+            recordData = recordData+'\n'; // end of record
+
+            brain.config.recordCount = brain.config.recordCount + 1;
+        });
+
+        console.log(brain.config.recordCount+' records created')
+        
+        brain.config.recordData = brain.config.recordData + recordData;
+
+        brain.config.filesToProcess = brain.config.filesToProcess - 1;
+        if (brain.config.filesToProcess <= 0) {
+            brain.showResult(name, 'MC');
+        }
+    },
+    parseDataMailchimpFull: function(data,name) {
         var byFDAF = brain.groupBy(data,'FDAF'); // Sort by FDAF
         var keys = Object.keys(byFDAF); // Get FDAF keys
         
@@ -285,17 +396,17 @@ var brain = {
                 recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
 
                 // Street Address 1
-                var streetAddress1 = data['Address 1'].substr(0,40);
+                var streetAddress1 = data['Address 1'];
                 if (streetAddress1 != undefined) {
-                    recordData = recordData+streetAddress1+brain.createFiller((40-streetAddress1.length));
+                    recordData = recordData+streetAddress1.substr(0,40)+brain.createFiller((40-streetAddress1.length));
                 } else {
                     recordData = recordData + brain.createFiller(40); 
                 }
 
                 // Street Address 2
-                var streetAddress2 = data['Address 2'].substr(0,40);
+                var streetAddress2 = data['Address 2'];
                 if (streetAddress2 != undefined) {
-                    recordData = recordData+streetAddress2+brain.createFiller((40-streetAddress2.length));
+                    recordData = recordData+streetAddress2.substr(0,40)+brain.createFiller((40-streetAddress2.length));
                 } else {
                     recordData = recordData + brain.createFiller(40); 
                 }
@@ -370,13 +481,6 @@ var brain = {
             if (item == '') {item = "Other"}
             brain.showResult(name, item);
         });
-
-
-
-        // brain.config.filesToProcess = brain.config.filesToProcess - 1;
-        // if (brain.config.filesToProcess <= 0) {
-        //     brain.showResult(name, brain.config.recordData, brain.config.recordCount);
-        // }
     },
     parseDataMAX: function(data,name) {
         var recordData = '';
