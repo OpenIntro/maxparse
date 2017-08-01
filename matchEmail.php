@@ -20,6 +20,8 @@ if($function=="getEmails"){
     echo json_encode($results);
 }
 if($function=="update"){
+    $campaignCode=$_SESSION["campaignCode"];
+    $sequenceCode=$_SESSION["sequenceCode"];
     $email = "";
     $First_Name = "";
     $Last_Name = "";
@@ -136,8 +138,7 @@ if($function=="update"){
     if (isset($_POST["NOTES"])) {
         $NOTES = mysqli_real_escape_string($conn,$_POST["NOTES"]);
     }
-    $query="UPDATE parse set `email`='$email',`f_name`='$First_Name',`l_name`='$Last_Name',`street_address`='$Address_1 $Address_2',`city`='$City',`state`='$State',`zipcode`='$Zipcode',`phone`='$Phone',`dma`='$DMA',`fadaf`='$FDAF',`optin`='$Opt_In',`intent`='$In_Market_Intent' WHERE email='$email'";
-    echo $query;
+    $query="UPDATE parse set `email`='$email',`f_name`='$First_Name',`l_name`='$Last_Name',`street_address`='$Address_1 $Address_2',`city`='$City',`state`='$State',`zipcode`='$Zipcode',`phone`='$Phone',`dma`='$DMA',`fadaf`='$FDAF',`optin`='$Opt_In',`intent`='$In_Market_Intent' WHERE email='$email' AND campaign_code='$campaignCode' AND sequence_code='$sequenceCode'";
     $result=mysqli_query($conn, $query) or die(mysqli_error($conn));
     echo json_encode($result);
 }
