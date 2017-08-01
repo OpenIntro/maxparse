@@ -33,9 +33,6 @@
     bottom: 0;
 }
 // Dropzone styling
-form {
-    margin-bottom: 20px;
-}
 .dz-hidden-input {
     visibility: hidden;
     position: absolute;
@@ -53,4 +50,18 @@ form {
 }
 #dropzone {
     border: 2px dashed #ccc;
+    margin-bottom: 20px;
+}
+
+.parsley-error,
+.parsley-error:focus {
+    border-color: red !important;
+    box-shadow: none;
+}
+
+.parsley-errors-list {
+    color: red;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }

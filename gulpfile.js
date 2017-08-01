@@ -58,7 +58,6 @@ gulp.task('views', function() {
     .pipe(notify({ message: 'Views task complete' }));
 });
 
-
 // gulp the styles
 gulp.task('css', function() {  
   return gulp.src(paths.dev.less+'main.less')
@@ -80,7 +79,7 @@ gulp.task('js', function(){
       // paths.dev.vendor+'bootstrap/js/popover.js',
       // // paths.dev.vendor+'bootstrap/js/collapse.js',
       // paths.dev.vendor+'bootstrap/js/transition.js',
-      // paths.dev.vendor+'parsleyjs/dist/parsley.js',
+      paths.dev.vendor+'parsleyjs/dist/parsley.js',
       paths.dev.vendor+'moment/moment.js',
       // '!'+paths.dev.js+'_*.js',
       paths.dev.js+'**/*'
@@ -91,7 +90,6 @@ gulp.task('js', function(){
     .pipe(gulp.dest(paths.production.js))
     .pipe(notify({ message: 'Scripts task complete' }));
 });
-
 
 // gulp the images
 gulp.task('images', function() {
@@ -130,7 +128,6 @@ gulp.task('clean', function(cb) {
 gulp.task('default', ['clean'], function() {
     gulp.start('css', 'js', 'images', 'fonts', 'copy');
 });
-
 
 // watch for changes
 gulp.task('watch', function() {

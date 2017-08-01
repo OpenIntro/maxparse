@@ -1,4 +1,3 @@
-<!doctype html>
 <!--
   __  __          __   __  _____                    
  |  \/  |   /\    \ \ / / |  __ \                   
@@ -25,90 +24,97 @@
     <link rel="stylesheet" href="https://rawgit.com/enyo/dropzone/master/dist/dropzone.css">
 
   </head>
-  <body>
+<body>
 
-    <section class="page-header">
-      <h1 class="project-name">MAX Parse</h1>
-      <h2 class="project-tagline">Parse customer CSV data</h2>
-    </section>
+<section class="page-header">
+    <h1 class="project-name">MAX Parse</h1>
+    <h2 class="project-tagline">Parse customer CSV data</h2>
 
-    <section class="main-content">
-      <div class="container">
+    <a href="view.php" class="btn btn-download">View Records</a>
+</section>
+
+<section class="main-content">
+    <div class="container">
         <h2>Upload your file</h2>
 
-        <form action="upload.php" method="post" enctype="multipart/form-data" id="dropzone" class="dropzone">
-          <div class="icon-upload"><i class="fa fa-cloud-upload" aria-hidden="true"></i></div>
+        <form action="upload.php" method="post" enctype="multipart/form-data" id="parseform">
 
-          <input type="file" name="file" class="dz-hidden-input" />
+            <div class="dropzone" id="dropzone">
+                <div class="icon-upload"><i class="fa fa-cloud-upload" aria-hidden="true"></i></div>
+
+                <input type="file" name="file" class="dz-hidden-input" />
+            </div>
+
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="campaignCode">Campaign Code</label>
+                        <input type="text" id="campaignCode" name="campaignCode" class="form-control" data-parsley-required="true" value="" placeholder="Campaign Code (required)" maxlength="10">
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="sequenceCode">Sequence Code</label>
+                        <input type="text" id="sequenceCode" name="sequenceCode" class="form-control" value="" data-parsley-required="true" placeholder="Sequence Code (required)" maxlength="3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="vendorEmail">Vendor Email</label>
+                        <input type="email" id="vendorEmail" name="vendorEmail" class="form-control" value="sean@leadingresponse.com">
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="vendorEmail">Vendor ID</label>
+                        <input type="text" id="vendorID" name="vendorID" class="form-control" value="0000000353">
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="combine" name="combine"> Combine records into one text file
+                </label>
+            </div>
         </form>
-        
-        <div class="row">
-          <div class="col-sm-4">
-            <div class="form-group">
-              <label for="vendorEmail">Vendor Email</label>
-              <input type="email" id="vendorEmail" name="vendorEmail" class="form-control" value="sean@leadingresponse.com">
-            </div>
-          </div>
-
-          <div class="col-sm-4">
-            <div class="form-group">
-              <label for="campaignCode">Campaign Code</label>
-              <input type="text" id="campaignCode" name="campaignCode" class="form-control" value="500604" maxlength="10">
-            </div>
-          </div>
-
-          <div class="col-sm-4 viewmore">
-            <a href="javascript:void(0)" id="advanced-link" class="small-link">View Advanced Fields</a>
-          </div>
-        </div>
-
-        <div class="row" id="advanced" style="display: none">
-          <div class="col-sm-4">
-            <div class="form-group">
-              <label for="vendorEmail">Vendor ID</label>
-              <input type="email" id="vendorID" name="vendorID" class="form-control" value="0000000353">
-            </div>
-          </div>
-          <div class="col-sm-4">
-            <div class="form-group">
-              <label for="sequenceCode">Sequence Code</label>
-              <input type="text" id="sequenceCode" name="sequenceCode" class="form-control" value="001" maxlength="3">
-            </div>
-          </div>
-        </div>
-
-        <div class="checkbox">
-          <label>
-            <input type="checkbox" id="combine" name="combine"> Combine records into one text file
-          </label>
-        </div>
-
+    </div>
+    
+    <div class="container">
         <div class="btn btn-download btn-process" id="btn-process">Parse</div>
-      </div>
-    </section>
-
-    <!-- Download button goes here -->
-    <section class="result">
-      <div class="container" id="result">
-        <h2>Results</h2>
-      </div>
-    </section>
-
-    <!-- Modal -->
-    <div class="modal fade general-modal" tabindex="-1" role="dialog" aria-labelledby="generalModal" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          
-        </div>
-      </div>
     </div>
 
-    <script src="assets/js/all.min.js"></script>
+    <br>
+</section>
 
-    <script>
-      // brain is On
-      brain.init();
-    </script>
+<!-- Download button goes here -->
+<section class="result">
+    <div class="container" id="result">
+        <h2>Results</h2>
+    </div>
+</section>
 
-  </body>
+<!-- Modal -->
+<div class="modal fade general-modal" tabindex="-1" role="dialog" aria-labelledby="generalModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="assets/js/all.min.js"></script>
+
+<script>
+    // brain is On
+    brain.init();
+</script>
+
+</body>
 </html>
