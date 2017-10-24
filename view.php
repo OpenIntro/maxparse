@@ -63,6 +63,8 @@ $result=mysqli_query($conn, $query) or die(mysqli_error($conn));
                     <th>FDAF</th>
                     <th>Optin</th>
                     <th>Intent</th>
+                    <th>Purchase Type</th>
+                    <th>Vehicle Interest</th>
                     <th>Vendor ID</th>
                     <th>Vendor Email</th>
                 </tr>
@@ -97,6 +99,8 @@ $result=mysqli_query($conn, $query) or die(mysqli_error($conn));
                         <td><?php echo $data['fadaf'];?></td>
                         <td><?php echo $data['optin'];?></td>
                         <td><?php echo $data['intent'];?></td>
+                        <td><?php echo $data['purchase_type'];?></td>
+                        <td><?php echo $data['vehicle_interest'];?></td>
                         <td><?php echo $data['vendor_id'];?></td>
                         <td><?php echo $data['vendor_email'];?></td>
                     </tr>
@@ -108,6 +112,24 @@ $result=mysqli_query($conn, $query) or die(mysqli_error($conn));
                 ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 50px;">
+        <div class="col-md-12 drows">
+            <p>Delete last</p>
+
+            <select id="howmanyrows" name="howmanyrows">
+              <option value="">--</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="500">500</option>
+            </select>
+
+            <p>rows.</p>
+
+            <button class="btn" id="btn-drows">Delete</button>
         </div>
     </div>
 </div>
@@ -136,6 +158,27 @@ $result=mysqli_query($conn, $query) or die(mysqli_error($conn));
                     $.notify(data, "error");
                 }
             });
+        });
+
+        $("#btn-drows").on('click',function () {
+            var rows=$("#howmanyrows").val();
+
+            if (rows != '') {
+                $.ajax({
+                    type: "POST",
+                    url: "deleteRows.php",
+                    data: {"numrows":rows},
+                    dataType: "text",
+                    success: function (data) {
+                        $.notify(data, "success");
+                        window.setTimeout(function(){location.reload()},2000)
+                    }
+                    ,
+                    error: function (data) {
+                        $.notify(data, "error");
+                    }
+                });
+            }
         });
     });
 </script>

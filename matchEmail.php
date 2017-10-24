@@ -33,6 +33,8 @@ if($function=="update"){
     $Phone = "";
     $Opt_In = "";
     $In_Market_Intent = "";
+    $Purchase_Type = "";
+    $Vehicle_Interest = "";
     $FDAF = "";
     $DMA = "";
     $MEMBER_RATING = "";
@@ -83,6 +85,12 @@ if($function=="update"){
     }
     if (isset($_POST["In_Market_Intent"])) {
         $In_Market_Intent = mysqli_real_escape_string($conn,$_POST["In_Market_Intent"]);
+    }
+    if (isset($_POST["Purchase_Type"])) {
+        $Purchase_Type = mysqli_real_escape_string($conn,$_POST["Purchase_Type"]);
+    }
+    if (isset($_POST["Vehicle_Interest"])) {
+        $Vehicle_Interest = mysqli_real_escape_string($conn,$_POST["Vehicle_Interest"]);
     }
     if (isset($_POST["FDAF"])) {
         $FDAF = mysqli_real_escape_string($conn,$_POST["FDAF"]);
@@ -138,7 +146,7 @@ if($function=="update"){
     if (isset($_POST["NOTES"])) {
         $NOTES = mysqli_real_escape_string($conn,$_POST["NOTES"]);
     }
-    $query="UPDATE parse set `email`='$email',`f_name`='$First_Name',`l_name`='$Last_Name',`street_address`='$Address_1 $Address_2',`city`='$City',`state`='$State',`zipcode`='$Zipcode',`phone`='$Phone',`dma`='$DMA',`fadaf`='$FDAF',`optin`='$Opt_In',`intent`='$In_Market_Intent' WHERE email='$email' AND campaign_code='$campaignCode' AND sequence_code='$sequenceCode'";
+    $query="UPDATE parse set `email`='$email',`f_name`='$First_Name',`l_name`='$Last_Name',`street_address`='$Address_1 $Address_2',`city`='$City',`state`='$State',`zipcode`='$Zipcode',`phone`='$Phone',`dma`='$DMA',`fadaf`='$FDAF',`optin`='$Opt_In',`intent`='$In_Market_Intent',`purchase_type`='$Purchase_Type',`vehicle_interest`='$Vehicle_Interest' WHERE email='$email' AND campaign_code='$campaignCode' AND sequence_code='$sequenceCode'";
     $result=mysqli_query($conn, $query) or die(mysqli_error($conn));
     echo json_encode($result);
 }
@@ -158,6 +166,8 @@ else if($function=="add") {
     $Phone = "";
     $Opt_In = "";
     $In_Market_Intent = "";
+    $Purchase_Type = "";
+    $Vehicle_Interest = "";
     $FDAF = "";
     $DMA = "";
     $MEMBER_RATING = "";
@@ -208,6 +218,12 @@ else if($function=="add") {
     }
     if (isset($_POST["In_Market_Intent"])) {
         $In_Market_Intent = mysqli_real_escape_string($conn,$_POST["In_Market_Intent"]);
+    }
+    if (isset($_POST["Purchase_Type"])) {
+        $Purchase_Type = mysqli_real_escape_string($conn,$_POST["Purchase_Type"]);
+    }
+    if (isset($_POST["Vehicle_Interest"])) {
+        $Vehicle_Interest = mysqli_real_escape_string($conn,$_POST["Vehicle_Interest"]);
     }
     if (isset($_POST["FDAF"])) {
         $FDAF = mysqli_real_escape_string($conn,$_POST["FDAF"]);
@@ -264,8 +280,8 @@ else if($function=="add") {
         $NOTES = mysqli_real_escape_string($conn,$_POST["NOTES"]);
     }
 
-    $qu = "INSERT INTO `parse`(`vendor_email`, `campaign_code`, `vendor_id`, `sequence_code`, `lead_date`, `email`, `f_name`, `l_name`, `street_address`, `city`, `state`, `zipcode`, `phone`, `dma`, `fadaf`, `optin`, `intent`) 
-                         VALUES ('$vendorEmail','$campaignCode','$vendorID','$sequenceCode',NOW(),'$email','$First_Name','$Last_Name','$Address_1.' '.$Address_2','$City','$State','$Zipcode','$Phone','$DMA','$FDAF','$Opt_In','$In_Market_Intent')";
+    $qu = "INSERT INTO `parse`(`vendor_email`, `campaign_code`, `vendor_id`, `sequence_code`, `lead_date`, `email`, `f_name`, `l_name`, `street_address`, `city`, `state`, `zipcode`, `phone`, `dma`, `fadaf`, `optin`, `intent`,`purchase_type`,`vehicle_interest`) 
+                         VALUES ('$vendorEmail','$campaignCode','$vendorID','$sequenceCode',NOW(),'$email','$First_Name','$Last_Name','$Address_1.' '.$Address_2','$City','$State','$Zipcode','$Phone','$DMA','$FDAF','$Opt_In','$In_Market_Intent','$Purchase_Type','$Vehicle_Interest')";
     $re = mysqli_query($conn, $qu) or die(mysqli_error($conn));
     echo "done";
 
