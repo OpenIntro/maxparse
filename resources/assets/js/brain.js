@@ -1333,7 +1333,7 @@ var brain = {
 
         $('.result').show();
         name = name.replace('csv', 'txt')
-        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+filename+'" class="">Download '+filename+'</a> - '+record_count+' records and '+duplicate_count+" Duplicate records were removed.</p>").show();
+        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+filename+'" class="">Download '+filename+'</a> - '+brain.config.recordCount+' records and '+duplicate_count+" Duplicate records were removed.</p>").show();
 
         brain.config.$processBtn.removeClass('processing').html('Parse');
 
