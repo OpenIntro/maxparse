@@ -29,6 +29,10 @@ var brain = {
             footerData: '',
             recordData: '',
             recordCount: 0,
+            pandoraLimited: 0,
+            facebookLimited: 0,
+            mailchimpLimited: 0,
+            mailchimpFull: 0,
             translationErrors: [],
             processedEmails: [],
             combineRecords: false,
@@ -320,7 +324,8 @@ var brain = {
                             recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
                             recordData = recordData+'\n'; // end of record
 
-                            brain.config.recordCount = brain.config.recordCount + 1;
+                            brain.config.recordCount = brain.config.recordCount + 1; // Total Records
+                            brain.config.pandoraLimited = brain.config.pandoraLimited + 1; // Pandora Limited Records
                         } else {
                             duplicate_count++;
                         }
@@ -646,7 +651,8 @@ var brain = {
                             recordData = recordData+brain.createFiller(648); // Space for Question/Answer Array
                             recordData = recordData+'\n'; // end of record
 
-                            brain.config.recordCount = brain.config.recordCount + 1;
+                            brain.config.recordCount = brain.config.recordCount + 1; // Total Records
+                            brain.config.facebookLimited = brain.config.facebookLimited + 1; // Facebook Limited Records
                         } else {
                             duplicate_count++;
                         }
@@ -895,8 +901,9 @@ var brain = {
                             recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
 
                             // Email
-                            recordData = recordData+data[i]['Email Address']
-                            recordData = recordData+brain.createFiller(80-data[i]['Email Address'].length);
+                            var email = data[i]['Email Address'];
+                            recordData = recordData+email;
+                            recordData = recordData+brain.createFiller(80-email.length);
 
                             recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
                             recordData = recordData+brain.createFiller(60);
@@ -978,7 +985,23 @@ var brain = {
 
                             recordData = recordData+'\n'; // end of record
 
-                            brain.config.recordCount = brain.config.recordCount + 1;
+                            brain.config.recordCount = brain.config.recordCount + 1; // Total Records
+
+                            if (firstName != '' &&
+                                lastName != '' &&
+                                email != '' &&
+                                zipcode.length == 5 &&
+                                phoneHome.length == 10 &&
+                                streetAddress1 != '' &&
+                                qa1 == '0799A' &&
+                                a2 != ' ' &&
+                                a3 != ' ' &&
+                                voi.length > 1) {
+                                brain.config.mailchimpFull= brain.config.mailchimpFull + 1; // Mailchimp Full Records
+                            } else {
+                                brain.config.mailchimpLimited = brain.config.mailchimpLimited + 1; // Mailchimp Limited Records
+                            }
+
                         } else {
                             duplicate_count++;
                         }
@@ -1333,13 +1356,18 @@ var brain = {
 
         $('.result').show();
         name = name.replace('csv', 'txt')
-        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+filename+'" class="">Download '+filename+'</a> - '+brain.config.recordCount+' records and '+duplicate_count+" Duplicate records were removed.</p>").show();
+
+        $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+filename+'" class="">Download '+filename+'</a> - <strong>'+brain.config.recordCount+'</strong> records added (<strong>'+brain.config.mailchimpFull+'/'+brain.config.mailchimpLimited+'</strong> Mailchimp, <strong>'+brain.config.facebookLimited+'</strong> Facebook, <strong>'+brain.config.pandoraLimited+'</strong> Pandora), <strong>'+duplicate_count+"</strong> duplicates removed.</p>").show();
 
         brain.config.$processBtn.removeClass('processing').html('Parse');
 
         brain.config.recordData = ''; // clear data
         brain.config.textData = ''; // clear data
         brain.config.recordCount = 0;  // clear data
+        brain.config.pandoraLimited = 0; // clear data
+        brain.config.facebookLimited = 0; // clear data
+        brain.config.mailchimpLimited = 0; // clear data
+        brain.config.mailchimpFull = 0; // clear data
         duplicate_count=0;
         record_count=0;
         brain.config.processedEmails = [];

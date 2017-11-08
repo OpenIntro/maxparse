@@ -80,7 +80,7 @@
 
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" id="combine" name="combine"> Combine records into one text file
+                    <input type="checkbox" id="combine" name="combine" checked="checked"> Combine records into one text file
                 </label>
             </div>
         </form>
