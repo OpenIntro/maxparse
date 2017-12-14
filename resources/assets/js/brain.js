@@ -29,10 +29,12 @@ var brain = {
             footerData: '',
             recordData: '',
             recordCount: 0,
+            errorCount: 0,
             pandoraLimited: 0,
             facebookLimited: 0,
             mailchimpLimited: 0,
             mailchimpFull: 0,
+            errorData: [],
             translationErrors: [],
             processedEmails: [],
             combineRecords: false,
@@ -305,29 +307,36 @@ var brain = {
                     var qa1 = '0799A';
 
                     $.each(data, function(i, item) {
-                        if (brain.config.processedEmails.indexOf(data[i]["Email"]) == -1) {
-                            brain.config.processedEmails.push(data[i]["Email"]); // add to array of emails in files being processed to check for dupes
+                        try {
+                            if (brain.config.processedEmails.indexOf(data[i]["Email"]) == -1) {
+                                brain.config.processedEmails.push(data[i]["Email"]); // add to array of emails in files being processed to check for dupes
 
-                            recordData = recordData+divisionCode+businessFlag+filler1+filler2+countryCode;
-                            recordData = recordData+data[i].ZIP+'     '; // Zip plus spaces
-                            recordData = recordData+phoneHome+phoneWork;
-                            recordData = recordData+data[i].Email;
-                            recordData = recordData+brain.createFiller(80-data[i].Email.length);
-                            recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
-                            recordData = recordData+brain.createFiller(60);
-                            var date = data[i].Date;
-                            date = moment(date, "YYYY-MM-DD HH:mm:ss");
-                            date = date.format("MM/DD/YYYY HH:mm");
-                            recordData = recordData+date;
-                            recordData = recordData+brain.createFiller(45);
-                            recordData = recordData+qa1;
-                            recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
-                            recordData = recordData+'\n'; // end of record
+                                recordData = recordData+divisionCode+businessFlag+filler1+filler2+countryCode;
+                                recordData = recordData+data[i].ZIP+'     '; // Zip plus spaces
+                                recordData = recordData+phoneHome+phoneWork;
+                                recordData = recordData+data[i].Email;
+                                recordData = recordData+brain.createFiller(80-data[i].Email.length);
+                                recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
+                                recordData = recordData+brain.createFiller(60);
+                                var date = data[i].Date;
+                                date = moment(date, "YYYY-MM-DD HH:mm:ss");
+                                date = date.format("MM/DD/YYYY HH:mm");
+                                recordData = recordData+date;
+                                recordData = recordData+brain.createFiller(45);
+                                recordData = recordData+qa1;
+                                recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+                                recordData = recordData+'\n'; // end of record
 
-                            brain.config.recordCount = brain.config.recordCount + 1; // Total Records
-                            brain.config.pandoraLimited = brain.config.pandoraLimited + 1; // Pandora Limited Records
-                        } else {
-                            duplicate_count++;
+                                brain.config.recordCount = brain.config.recordCount + 1; // Total Records
+                                brain.config.pandoraLimited = brain.config.pandoraLimited + 1; // Pandora Limited Records
+                            } else {
+                                duplicate_count++;
+                            }
+                        } catch(err) {
+                            brain.config.errorCount = brain.config.errorCount + 1;
+                            brain.config.errorData.push(data[i]["Email"]);
+                            console.log('An error happened on record ' + i+1 + ' - ' + data[i]["Email"]);
+                            // console.log(err)
                         }
                     });
 
@@ -517,145 +526,153 @@ var brain = {
                     var a3 = '';
 
                     $.each(data, function(i, item) {
-                        if (brain.config.processedEmails.indexOf(data[i]["email"]) == -1) {
-                            brain.config.processedEmails.push(data[i]["email"]); // add to array of emails in files being processed to check for dupes
+                        try {
+                            if (brain.config.processedEmails.indexOf(data[i]["email"]) == -1) {
+                                brain.config.processedEmails.push(data[i]["email"]); // add to array of emails in files being processed to check for dupes
 
-                            recordData = recordData+divisionCode+businessFlag+filler1;
+                                recordData = recordData+divisionCode+businessFlag+filler1;
 
-                            // Name
-                            var firstName = brain.scrubName(data[i].first_name);
-                            recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
-                            var lastName = brain.scrubName(data[i].last_name)
-                            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
+                                // Name
+                                var firstName = brain.scrubName(data[i].first_name);
+                                recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
+                                var lastName = brain.scrubName(data[i].last_name)
+                                recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
 
-                            // Street Address
-                            if (data[i].street_address != undefined) {
-                                var streetAddress1 = data[i].street_address;
-                                recordData = recordData+streetAddress1.substr(0,40)+brain.createFiller((40-streetAddress1.length+40)); // still adding 40 spaces for street address 2 which isn't present yet
-                                // var streetAddress2 = data[i].street_address2;
-                                // recordData = recordData+streetAddress2.substr(0,40)+brain.createFiller((40-streetAddress2));
-                            } else {
-                                recordData = recordData + brain.createFiller(80);
-                            }
-
-                            // City
-                            if (data[i].city != undefined) {
-                                var city = data[i].city;
-                                recordData = recordData+city+brain.createFiller((40-city.length));
-                            } else {
-                                recordData = recordData + brain.createFiller(40);
-                            }
-
-                            // State
-                            if (data[i].state != undefined) {
-                                var state = data[i].state;
-                                if (state.length > 2) {
-                                    state = brain.abbrState(state, 'abbr'); // update to state abbreviation
-                                }
-                                recordData = recordData+state+brain.createFiller((2-state.length));
-                            } else {
-                                recordData = recordData + brain.createFiller(2);
-                            }
-
-                            // Zip Code
-                            var zipcode = data[i]["post_code"];
-                            if (zipcode && zipcode.length < 5) {
-                                zipcode = brain.pad(data[i]["post_code"], 5);
-                            }
-
-                            recordData = recordData+countryCode+zipcode+'     '; // Zip plus spaces
-                            var phone = data[i]["phone_number"];
-                                phone = phone.replace(/\D/g,''); // remove all but numbers
-                            if (phone.charAt(0) == "1") {
-                                phone = phone.substr(1);
-                            }
-                            phone = phone.substring(0,10);
-                            if (phone.length < 10) {
-                                phone = '';
-                            }
-                            recordData = recordData+phone+phoneWork;
-                            recordData = recordData+data[i].email;
-                            recordData = recordData+brain.createFiller(80-data[i].email.length);
-                            recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
-                            recordData = recordData+brain.createFiller(60);
-                            var datetime = data[i].created_time;
-                            date = datetime.substr(0, 10);
-                            time = datetime.substr(11,5);
-                            date = date+' '+time;
-                            date = moment(date, "YYYY-MM-DD HH:mm");
-                            date = date.format("MM/DD/YYYY HH:mm");
-                            recordData = recordData+date; // Request Date
-                            recordData = recordData+brain.createFiller(17)+brain.createFiller(6); // Vehicle VIN and Preferred Dealer
-
-                            if (data[i].voi != undefined && voi.length > 1) {
-                                if (data[i].voi == '2' || data[i].voi == '002') { // 2017 Mustang
-                                    recordData = recordData+'002'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (data[i].voi == '6' || data[i].voi == '006') { // 2017 Explorer
-                                    recordData = recordData+'006'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (data[i].voi == '7' || data[i].voi == '007') { // 2017 Expedition
-                                    recordData = recordData+'007'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (data[i].voi == '8' || data[i].voi == '008') { // 2018 F-150
-                                    recordData = recordData+'008'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
-                                } else if (data[i].voi == '12' || data[i].voi == '012') { // 2017 Super Duty F-250
-                                    recordData = recordData+'012'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (data[i].voi == '48' || data[i].voi == '048') { // 2017 Focus
-                                    recordData = recordData+'048'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (data[i].voi == '53' || data[i].voi == '053') { // 2018 Escape
-                                    recordData = recordData+'053'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
-                                } else if (data[i].voi == '100' || data[i].voi == '100') { // 2018 Edge
-                                    recordData = recordData+'100'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
-                                } else if (data[i].voi == '211' || data[i].voi == '211') { // 2018 Fusion
-                                    recordData = recordData+'211'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
+                                // Street Address
+                                if (data[i].street_address != undefined) {
+                                    var streetAddress1 = data[i].street_address;
+                                    recordData = recordData+streetAddress1.substr(0,40)+brain.createFiller((40-streetAddress1.length+40)); // still adding 40 spaces for street address 2 which isn't present yet
+                                    // var streetAddress2 = data[i].street_address2;
+                                    // recordData = recordData+streetAddress2.substr(0,40)+brain.createFiller((40-streetAddress2));
+                                } else {
+                                    recordData = recordData + brain.createFiller(80);
                                 }
 
-                                recordData = recordData+'P'; // Fulfillment Channel
-                                recordData = recordData+'EN'; // Fulfillment Language
+                                // City
+                                if (data[i].city != undefined) {
+                                    var city = data[i].city;
+                                    recordData = recordData+city+brain.createFiller((40-city.length));
+                                } else {
+                                    recordData = recordData + brain.createFiller(40);
+                                }
+
+                                // State
+                                if (data[i].state != undefined) {
+                                    var state = data[i].state;
+                                    if (state.length > 2) {
+                                        state = brain.abbrState(state, 'abbr'); // update to state abbreviation
+                                    }
+                                    recordData = recordData+state+brain.createFiller((2-state.length));
+                                } else {
+                                    recordData = recordData + brain.createFiller(2);
+                                }
+
+                                // Zip Code
+                                var zipcode = data[i]["post_code"];
+                                if (zipcode && zipcode.length < 5) {
+                                    zipcode = brain.pad(data[i]["post_code"], 5);
+                                }
+
+                                recordData = recordData+countryCode+zipcode+'     '; // Zip plus spaces
+                                var phone = data[i]["phone_number"];
+                                    phone = phone.replace(/\D/g,''); // remove all but numbers
+                                if (phone.charAt(0) == "1") {
+                                    phone = phone.substr(1);
+                                }
+                                phone = phone.substring(0,10);
+                                if (phone.length < 10) {
+                                    phone = '';
+                                }
+                                recordData = recordData+phone+phoneWork;
+                                recordData = recordData+data[i].email;
+                                recordData = recordData+brain.createFiller(80-data[i].email.length);
+                                recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
+                                recordData = recordData+brain.createFiller(60);
+                                var datetime = data[i].created_time;
+                                date = datetime.substr(0, 10);
+                                time = datetime.substr(11,5);
+                                date = date+' '+time;
+                                date = moment(date, "YYYY-MM-DD HH:mm");
+                                date = date.format("MM/DD/YYYY HH:mm");
+                                recordData = recordData+date; // Request Date
+                                recordData = recordData+brain.createFiller(17)+brain.createFiller(6); // Vehicle VIN and Preferred Dealer
+
+                                if (data[i].voi != undefined && voi.length > 1) {
+                                    if (data[i].voi == '2' || data[i].voi == '002') { // 2017 Mustang
+                                        recordData = recordData+'002'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (data[i].voi == '6' || data[i].voi == '006') { // 2017 Explorer
+                                        recordData = recordData+'006'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (data[i].voi == '7' || data[i].voi == '007') { // 2017 Expedition
+                                        recordData = recordData+'007'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (data[i].voi == '8' || data[i].voi == '008') { // 2018 F-150
+                                        recordData = recordData+'008'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    } else if (data[i].voi == '12' || data[i].voi == '012') { // 2017 Super Duty F-250
+                                        recordData = recordData+'012'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (data[i].voi == '48' || data[i].voi == '048') { // 2017 Focus
+                                        recordData = recordData+'048'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (data[i].voi == '53' || data[i].voi == '053') { // 2018 Escape
+                                        recordData = recordData+'053'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    } else if (data[i].voi == '100' || data[i].voi == '100') { // 2018 Edge
+                                        recordData = recordData+'100'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    } else if (data[i].voi == '211' || data[i].voi == '211') { // 2018 Fusion
+                                        recordData = recordData+'211'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    }
+
+                                    recordData = recordData+'P'; // Fulfillment Channel
+                                    recordData = recordData+'EN'; // Fulfillment Language
+                                } else {
+                                    recordData = recordData+brain.createFiller(22);
+                                }
+
+                                recordData = recordData+qa1;
+                                recordData = recordData+brain.createFiller(19); // trailing space for Q1
+
+                                // Intent Question
+                                if (data[i][q2] != undefined) {
+                                    var qa2 = '1077';
+
+                                    if (data[i][q2].length > 0)             {a2 = data[i][q2]}
+                                    else {qa2='    ';a2=' ';}
+                                    recordData = recordData+qa2+a2+brain.createFiller(19);
+                                } else {
+                                    recordData = recordData+brain.createFiller(24); // space if question is blank
+                                }
+
+                                // Purchase Type
+                                if (data[i][q3] != undefined) {
+                                    var qa3 = '0003';
+
+                                    if (data[i][q3].length > 0)             {a3 = data[i][q3]}
+                                    else {qa3='    ';a3=' ';}
+                                    recordData = recordData+qa3+a3+brain.createFiller(19);
+                                } else {
+                                    recordData = recordData+brain.createFiller(24); // space if question is blank
+                                }
+                                
+                                recordData = recordData+brain.createFiller(648); // Space for Question/Answer Array
+                                recordData = recordData+'\n'; // end of record
+
+                                brain.config.recordCount = brain.config.recordCount + 1; // Total Records
+                                brain.config.facebookLimited = brain.config.facebookLimited + 1; // Facebook Limited Records
                             } else {
-                                recordData = recordData+brain.createFiller(22);
+                                duplicate_count++;
                             }
-
-                            recordData = recordData+qa1;
-                            recordData = recordData+brain.createFiller(19); // trailing space for Q1
-
-                            // Intent Question
-                            if (data[i][q2] != undefined) {
-                                var qa2 = '1077';
-
-                                if (data[i][q2].length > 0)             {a2 = data[i][q2]}
-                                else {qa2='    ';a2=' ';}
-                                recordData = recordData+qa2+a2+brain.createFiller(19);
-                            } else {
-                                recordData = recordData+brain.createFiller(24); // space if question is blank
-                            }
-
-                            // Purchase Type
-                            if (data[i][q3] != undefined) {
-                                var qa3 = '0003';
-
-                                if (data[i][q3].length > 0)             {a3 = data[i][q3]}
-                                else {qa3='    ';a3=' ';}
-                                recordData = recordData+qa3+a3+brain.createFiller(19);
-                            } else {
-                                recordData = recordData+brain.createFiller(24); // space if question is blank
-                            }
-                            
-                            recordData = recordData+brain.createFiller(648); // Space for Question/Answer Array
-                            recordData = recordData+'\n'; // end of record
-
-                            brain.config.recordCount = brain.config.recordCount + 1; // Total Records
-                            brain.config.facebookLimited = brain.config.facebookLimited + 1; // Facebook Limited Records
-                        } else {
-                            duplicate_count++;
+                        } catch(err) {
+                            brain.config.errorCount = brain.config.errorCount + 1;
+                            brain.config.errorData.push(data[i]["email"]);
+                            console.log('An error happened on record ' + i+1 + ' - ' + data[i]["email"]);
+                            // console.log(err)
                         }
+
                     });
 
                     console.log(brain.config.recordCount+' records created')
@@ -840,170 +857,177 @@ var brain = {
                     var a3 = '';
 
                     $.each(data, function(i, item) {
-                        if (brain.config.processedEmails.indexOf(data[i]["Email Address"]) == -1) {
-                            brain.config.processedEmails.push(data[i]["Email Address"]); // add to array of emails in files being processed to check for dupes
+                        try {
+                            if (brain.config.processedEmails.indexOf(data[i]["Email Address"]) == -1) {
+                                brain.config.processedEmails.push(data[i]["Email Address"]); // add to array of emails in files being processed to check for dupes
 
-                            recordData = recordData+divisionCode+businessFlag+filler1;
-                            var firstName = brain.scrubName(data[i]['First Name']);
-                            recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
-                            var lastName = brain.scrubName(data[i]['Last Name']);
-                            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
+                                recordData = recordData+divisionCode+businessFlag+filler1;
+                                var firstName = brain.scrubName(data[i]['First Name']);
+                                recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
+                                var lastName = brain.scrubName(data[i]['Last Name']);
+                                recordData = recordData+lastName+brain.createFiller((35-lastName.length)+5); // still adding 5 spaces for suffix which isn't present yet
 
-                            // Street Address 1
-                            var streetAddress1 = data[i]['Address 1'];
-                            if (streetAddress1 != undefined) {
-                                recordData = recordData+streetAddress1.substr(0,40)+brain.createFiller((40-streetAddress1.length));
-                            } else {
-                                recordData = recordData + brain.createFiller(40);
-                            }
-
-                            // Street Address 2
-                            var streetAddress2 = data[i]['Address 2'];
-                            if (streetAddress2 != undefined) {
-                                recordData = recordData+streetAddress2.substr(0,40)+brain.createFiller((40-streetAddress2.length));
-                            } else {
-                                recordData = recordData + brain.createFiller(40);
-                            }
-
-                            // City
-                            var city = data[i]['City'];
-                            if (city != undefined) {
-                                recordData = recordData+city+brain.createFiller((40-city.length));
-                            } else {
-                                recordData = recordData + brain.createFiller(40);
-                            }
-
-                            // State
-                            var state = data[i]['State'];
-                            if (state != undefined) {
-                                if (state.length > 2) {
-                                    state = brain.abbrState(state, 'abbr'); // update to state abbreviation
-                                }
-                                recordData = recordData+state+brain.createFiller((2-state.length));
-                            } else {
-                                recordData = recordData + brain.createFiller(2);
-                            }
-
-                            // Zip Code
-                            var zipcode = data[i]["Zipcode"];
-                            if (zipcode && zipcode.length < 5) {
-                                zipcode = brain.pad(zipcode, 5);
-                            }
-
-                            recordData = recordData+countryCode+zipcode+'     '; // Zip plus spaces
-
-                            // Phone
-                            var phoneHome = data[i]['Phone'];
-                                phoneHome = phoneHome.replace(/\D/g,''); // remove all but numbers
-                            if (phoneHome.length < 10) {
-                                phoneHome = '';
-                            }
-                            recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
-
-                            // Email
-                            var email = data[i]['Email Address'];
-                            recordData = recordData+email;
-                            recordData = recordData+brain.createFiller(80-email.length);
-
-                            recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
-                            recordData = recordData+brain.createFiller(60);
-                            var date = data[i]['CONFIRM_TIME'];
-                            if (date.substr(0,2) == "20") {
-                                date = moment(date, "YYYY-MM-DD HH:mm:ss");
-                            } else {
-                                date = moment(date, "MM-DD-YYYY HH:mm:ss");
-                            }
-                            date = date.format("MM/DD/YYYY HH:mm");
-
-                            recordData = recordData+date;  // Request Date
-                            
-                            recordData = recordData+brain.createFiller(17)+brain.createFiller(6); // Vehicle VIN and Preferred Dealer
-
-                            var voi = data[i]["Which model vehicle are you most interested in?"];
-                            if (voi != undefined && voi.length > 1) {
-                                if (voi == '2' || voi == '002') { // 2017 Mustang
-                                    recordData = recordData+'002'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (voi == '6' || voi == '006') { // 2017 Explorer
-                                    recordData = recordData+'006'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (voi == '7' || voi == '007') { // 2017 Expedition
-                                    recordData = recordData+'007'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (voi == '8' || voi == '008') { // 2018 F-150
-                                    recordData = recordData+'008'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
-                                } else if (voi == '12' || voi == '012') { // 2017 Super Duty F-250
-                                    recordData = recordData+'012'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (voi == '48' || voi == '048') { // 2017 Focus
-                                    recordData = recordData+'048'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2017'; // Fulfillment Year
-                                } else if (voi == '53' || voi == '053') { // 2018 Escape
-                                    recordData = recordData+'053'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
-                                } else if (voi == '100' || voi == '100') { // 2018 Edge
-                                    recordData = recordData+'100'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
-                                } else if (voi == '211' || voi == '211') { // 2018 Fusion
-                                    recordData = recordData+'211'+brain.createFiller(12); // Fulfillment Code
-                                    recordData = recordData+'2018'; // Fulfillment Year
+                                // Street Address 1
+                                var streetAddress1 = data[i]['Address 1'];
+                                if (streetAddress1 != undefined) {
+                                    recordData = recordData+streetAddress1.substr(0,40)+brain.createFiller((40-streetAddress1.length));
+                                } else {
+                                    recordData = recordData + brain.createFiller(40);
                                 }
 
-                                recordData = recordData+'P'; // Fulfillment Channel
-                                recordData = recordData+'EN'; // Fulfillment Language
+                                // Street Address 2
+                                var streetAddress2 = data[i]['Address 2'];
+                                if (streetAddress2 != undefined) {
+                                    recordData = recordData+streetAddress2.substr(0,40)+brain.createFiller((40-streetAddress2.length));
+                                } else {
+                                    recordData = recordData + brain.createFiller(40);
+                                }
+
+                                // City
+                                var city = data[i]['City'];
+                                if (city != undefined) {
+                                    recordData = recordData+city+brain.createFiller((40-city.length));
+                                } else {
+                                    recordData = recordData + brain.createFiller(40);
+                                }
+
+                                // State
+                                var state = data[i]['State'];
+                                if (state != undefined) {
+                                    if (state.length > 2) {
+                                        state = brain.abbrState(state, 'abbr'); // update to state abbreviation
+                                    }
+                                    recordData = recordData+state+brain.createFiller((2-state.length));
+                                } else {
+                                    recordData = recordData + brain.createFiller(2);
+                                }
+
+                                // Zip Code
+                                var zipcode = data[i]["Zipcode"];
+                                if (zipcode && zipcode.length < 5) {
+                                    zipcode = brain.pad(zipcode, 5);
+                                }
+
+                                recordData = recordData+countryCode+zipcode+'     '; // Zip plus spaces
+
+                                // Phone
+                                var phoneHome = data[i]['Phone'];
+                                    phoneHome = phoneHome.replace(/\D/g,''); // remove all but numbers
+                                if (phoneHome.length < 10) {
+                                    phoneHome = '';
+                                }
+                                recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
+
+                                // Email
+                                var email = data[i]['Email Address'];
+                                recordData = recordData+email;
+                                recordData = recordData+brain.createFiller(80-email.length);
+
+                                recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
+                                recordData = recordData+brain.createFiller(60);
+                                var date = data[i]['CONFIRM_TIME'];
+                                if (date.substr(0,2) == "20") {
+                                    date = moment(date, "YYYY-MM-DD HH:mm:ss");
+                                } else {
+                                    date = moment(date, "MM-DD-YYYY HH:mm:ss");
+                                }
+                                date = date.format("MM/DD/YYYY HH:mm");
+
+                                recordData = recordData+date;  // Request Date
+                                
+                                recordData = recordData+brain.createFiller(17)+brain.createFiller(6); // Vehicle VIN and Preferred Dealer
+
+                                var voi = data[i]["Which model vehicle are you most interested in?"];
+                                if (voi != undefined && voi.length > 1) {
+                                    if (voi == '2' || voi == '002') { // 2017 Mustang
+                                        recordData = recordData+'002'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (voi == '6' || voi == '006') { // 2017 Explorer
+                                        recordData = recordData+'006'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (voi == '7' || voi == '007') { // 2017 Expedition
+                                        recordData = recordData+'007'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (voi == '8' || voi == '008') { // 2018 F-150
+                                        recordData = recordData+'008'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    } else if (voi == '12' || voi == '012') { // 2017 Super Duty F-250
+                                        recordData = recordData+'012'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (voi == '48' || voi == '048') { // 2017 Focus
+                                        recordData = recordData+'048'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2017'; // Fulfillment Year
+                                    } else if (voi == '53' || voi == '053') { // 2018 Escape
+                                        recordData = recordData+'053'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    } else if (voi == '100' || voi == '100') { // 2018 Edge
+                                        recordData = recordData+'100'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    } else if (voi == '211' || voi == '211') { // 2018 Fusion
+                                        recordData = recordData+'211'+brain.createFiller(12); // Fulfillment Code
+                                        recordData = recordData+'2018'; // Fulfillment Year
+                                    }
+
+                                    recordData = recordData+'P'; // Fulfillment Channel
+                                    recordData = recordData+'EN'; // Fulfillment Language
+                                } else {
+                                    recordData = recordData+brain.createFiller(22);
+                                }
+
+                                recordData = recordData+qa1;
+                                recordData = recordData+brain.createFiller(19); // trailing space for Q1
+
+                                // Intent Question
+                                if (data[i][q2] != undefined) {
+                                    var qa2 = '1077';
+
+                                    if (data[i][q2].length > 0)             {a2 = data[i][q2]}
+                                    else {qa2='    ';a2=' ';}
+                                    recordData = recordData+qa2+a2+brain.createFiller(19);
+                                } else {
+                                    recordData = recordData+brain.createFiller(24); // space if question is blank
+                                }
+
+                                // Purchase Type
+                                if (data[i][q3] != undefined) {
+                                    var qa3 = '0003';
+
+                                    if (data[i][q3].length > 0)             {a3 = data[i][q3]}
+                                    else {qa3='    ';a3=' ';}
+                                    recordData = recordData+qa3+a3+brain.createFiller(19);
+                                } else {
+                                    recordData = recordData+brain.createFiller(24); // space if question is blank
+                                }
+                                
+                                recordData = recordData+brain.createFiller(648); // Space for Question/Answer Array
+
+                                recordData = recordData+'\n'; // end of record
+
+                                brain.config.recordCount = brain.config.recordCount + 1; // Total Records
+
+                                if (firstName != '' &&
+                                    lastName != '' &&
+                                    email != '' &&
+                                    zipcode.length == 5 &&
+                                    phoneHome.length == 10 &&
+                                    streetAddress1 != '' &&
+                                    qa1 == '0799A' &&
+                                    a2 != ' ' &&
+                                    a3 != ' ' &&
+                                    voi.length > 1) {
+                                    brain.config.mailchimpFull= brain.config.mailchimpFull + 1; // Mailchimp Full Records
+                                } else {
+                                    brain.config.mailchimpLimited = brain.config.mailchimpLimited + 1; // Mailchimp Limited Records
+                                }
+
                             } else {
-                                recordData = recordData+brain.createFiller(22);
+                                duplicate_count++;
                             }
-
-                            recordData = recordData+qa1;
-                            recordData = recordData+brain.createFiller(19); // trailing space for Q1
-
-                            // Intent Question
-                            if (data[i][q2] != undefined) {
-                                var qa2 = '1077';
-
-                                if (data[i][q2].length > 0)             {a2 = data[i][q2]}
-                                else {qa2='    ';a2=' ';}
-                                recordData = recordData+qa2+a2+brain.createFiller(19);
-                            } else {
-                                recordData = recordData+brain.createFiller(24); // space if question is blank
-                            }
-
-                            // Purchase Type
-                            if (data[i][q3] != undefined) {
-                                var qa3 = '0003';
-
-                                if (data[i][q3].length > 0)             {a3 = data[i][q3]}
-                                else {qa3='    ';a3=' ';}
-                                recordData = recordData+qa3+a3+brain.createFiller(19);
-                            } else {
-                                recordData = recordData+brain.createFiller(24); // space if question is blank
-                            }
-                            
-                            recordData = recordData+brain.createFiller(648); // Space for Question/Answer Array
-
-                            recordData = recordData+'\n'; // end of record
-
-                            brain.config.recordCount = brain.config.recordCount + 1; // Total Records
-
-                            if (firstName != '' &&
-                                lastName != '' &&
-                                email != '' &&
-                                zipcode.length == 5 &&
-                                phoneHome.length == 10 &&
-                                streetAddress1 != '' &&
-                                qa1 == '0799A' &&
-                                a2 != ' ' &&
-                                a3 != ' ' &&
-                                voi.length > 1) {
-                                brain.config.mailchimpFull= brain.config.mailchimpFull + 1; // Mailchimp Full Records
-                            } else {
-                                brain.config.mailchimpLimited = brain.config.mailchimpLimited + 1; // Mailchimp Limited Records
-                            }
-
-                        } else {
-                            duplicate_count++;
+                        } catch(err) {
+                            brain.config.errorCount = brain.config.errorCount + 1;
+                            brain.config.errorData.push(data[i]["Email Address"]);
+                            console.log('An error happened on record ' + i+1 + ' - ' + data[i]["Email Address"]);
+                            // console.log(err)
                         }
                     });
 
@@ -1282,33 +1306,40 @@ var brain = {
                     var qa1 = '0799A';
 
                     $.each(data, function(i, item) {
-                        if (brain.config.processedEmails.indexOf(data[i]["email"]) == -1) {
-                            brain.config.processedEmails.push(data[i]["email"]); // add to array of emails in files being processed to check for dupes
-                            recordData = recordData+divisionCode+businessFlag+filler1;
-                            var firstName = brain.scrubName(data[i]['first_name']);
-                            recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
-                            var lastName = brain.scrubName(data[i]['last_name']);
-                            recordData = recordData+lastName+brain.createFiller((35-lastName.length)+127);
-                            recordData = recordData+countryCode+data[i]['zip_code']+'     '; // Zip plus spaces
-                            var phoneHome = data[i]['phone'];
-                            phoneHome = phoneHome.replace(/-/g, ""); // replace dashes in phone number
-                            recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
-                            recordData = recordData+data[i]['email']
-                            recordData = recordData+brain.createFiller(80-data[i]['email'].length);
-                            recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
-                            recordData = recordData+brain.createFiller(60);
-                            var date = data[i]['created_time'];
-                            date = moment(date, "MM/DD/YYYY HH:mm");
-                            date = date.format("MM/DD/YYYY HH:mm");
-                            recordData = recordData+date;
-                            recordData = recordData+brain.createFiller(45);
-                            recordData = recordData+qa1;
-                            recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
-                            recordData = recordData+'\n'; // end of record
+                        try {
+                            if (brain.config.processedEmails.indexOf(data[i]["email"]) == -1) {
+                                brain.config.processedEmails.push(data[i]["email"]); // add to array of emails in files being processed to check for dupes
+                                recordData = recordData+divisionCode+businessFlag+filler1;
+                                var firstName = brain.scrubName(data[i]['first_name']);
+                                recordData = recordData+firstName+brain.createFiller(30-firstName.length)+' ';
+                                var lastName = brain.scrubName(data[i]['last_name']);
+                                recordData = recordData+lastName+brain.createFiller((35-lastName.length)+127);
+                                recordData = recordData+countryCode+data[i]['zip_code']+'     '; // Zip plus spaces
+                                var phoneHome = data[i]['phone'];
+                                phoneHome = phoneHome.replace(/-/g, ""); // replace dashes in phone number
+                                recordData = recordData+phoneHome+phoneWork+brain.createFiller(10-phoneHome.length);
+                                recordData = recordData+data[i]['email']
+                                recordData = recordData+brain.createFiller(80-data[i]['email'].length);
+                                recordData = recordData+campaignCode+brain.createFiller(10-campaignCode.length)+sequenceCode;
+                                recordData = recordData+brain.createFiller(60);
+                                var date = data[i]['created_time'];
+                                date = moment(date, "MM/DD/YYYY HH:mm");
+                                date = date.format("MM/DD/YYYY HH:mm");
+                                recordData = recordData+date;
+                                recordData = recordData+brain.createFiller(45);
+                                recordData = recordData+qa1;
+                                recordData = recordData+brain.createFiller(715); // Space for Question/Answer Array
+                                recordData = recordData+'\n'; // end of record
 
-                            brain.config.recordCount = brain.config.recordCount + 1;
-                        } else {
-                            duplicate_count++;
+                                brain.config.recordCount = brain.config.recordCount + 1;
+                            } else {
+                                duplicate_count++;
+                            }
+                        } catch(err) {
+                            brain.config.errorCount = brain.config.errorCount + 1;
+                            brain.config.errorData.push(data[i]["email"]);
+                            console.log('An error happened on record ' + i+1 + ' - ' + data[i]["email"]);
+                            // console.log(err)
                         }
                     });
 
@@ -1359,11 +1390,19 @@ var brain = {
 
         $('#result').append('<p><a href="'+brain.makeTextFile(brain.config.textData)+'" download="'+filename+'" class="">Download '+filename+'</a> - <strong>'+brain.config.recordCount+'</strong> records added (<strong>'+brain.config.mailchimpFull+'/'+brain.config.mailchimpLimited+'</strong> Mailchimp, <strong>'+brain.config.facebookLimited+'</strong> Facebook, <strong>'+brain.config.pandoraLimited+'</strong> Pandora), <strong>'+duplicate_count+"</strong> duplicates removed.</p>").show();
 
+        if (brain.config.errorCount > 0) {
+            $('#result').append('<h3 class="error">'+brain.config.errorCount+' Errors</h3>');
+            $.each(brain.config.errorData, function(i, item) {
+                $('#result').append('<p>'+brain.config.errorData[i]+'</p>');
+            });
+        }
+
         brain.config.$processBtn.removeClass('processing').html('Parse');
 
         brain.config.recordData = ''; // clear data
         brain.config.textData = ''; // clear data
         brain.config.recordCount = 0;  // clear data
+        brain.config.errorCount = 0;  // clear data
         brain.config.pandoraLimited = 0; // clear data
         brain.config.facebookLimited = 0; // clear data
         brain.config.mailchimpLimited = 0; // clear data
@@ -1371,6 +1410,7 @@ var brain = {
         duplicate_count=0;
         record_count=0;
         brain.config.processedEmails = [];
+        brain.config.errorData = [];
     },
     makeTextFile: function(text){
         var textFile = null;
